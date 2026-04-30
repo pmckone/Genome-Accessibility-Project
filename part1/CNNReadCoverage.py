@@ -15,43 +15,23 @@ OUTPUT_DIR = os.path.join(BASE_DIR, 'results')
 
 
 class CoverageDataset(Dataset):
-    def __init__(self, coverage_dict, window_size=1000):
-        self.window_size = window_size
-        half = window_size // 2
-        all_windows = []
-        all_targets = []
-        for srx_id, chrom_dict in coverage_dict.items():
-            for chrom, coverage in chrom_dict.items():
-                n = len(coverage)
-                if n < window_size:
-                    continue
-                shape   = (n - window_size + 1, window_size)
-                strides = (coverage.strides[0], coverage.strides[0])
-                windows = np.lib.stride_tricks.as_strided(coverage, shape=shape, strides=strides)
-                targets = coverage[half : half + len(windows)]
-                all_windows.append(windows.copy())
-                all_targets.append(targets.copy())
-
-        self.windows = np.concatenate(all_windows, axis=0).astype(np.float32)
-        self.targets = np.concatenate(all_targets, axis=0).astype(np.float32)
-        print(f"Dataset: {len(self.windows)} windows of size {window_size}")
+    def __init__(self, windows, targets):
+        self.windows = windows
+        self.targets = targets
 
     def __len__(self):
         return len(self.windows)
 
     def __getitem__(self, idx):
-        x = torch.tensor(self.windows[idx], dtype=torch.float32).unsqueeze(0)  # (1, window_size)
+        x = torch.tensor(self.windows[idx], dtype=torch.float32).unsqueeze(0)
         y = torch.tensor([self.targets[idx]], dtype=torch.float32)
         return x, y
 
 
-def get_dataloaders(train_val_coverage, test_coverage, window_size=500,
+def get_dataloaders(train_windows, train_targets, test_windows, test_targets,
                     batch_size=1024, val_split=0.2):
-    print("Building train/val dataset...")
-    train_val_dataset = CoverageDataset(train_val_coverage, window_size=window_size)
-
-    print("Building test dataset...")
-    test_dataset = CoverageDataset(test_coverage, window_size=window_size)
+    train_val_dataset = CoverageDataset(train_windows, train_targets)
+    test_dataset      = CoverageDataset(test_windows,  test_targets)
 
     total      = len(train_val_dataset)
     val_size   = int(total * val_split)
@@ -205,15 +185,16 @@ def load_modelCNN(path=os.path.join(OUTPUT_DIR, 'model.pth'), num_kernels=8, ker
 
 
 if __name__ == '__main__':
-    train_val_coverage, test_coverage = load_coverage()
+    from DataProcess import load_windows
+
+    train_windows, train_targets, test_windows, test_targets = load_windows()
 
     train_loader, val_loader, test_loader = get_dataloaders(
-        train_val_coverage, test_coverage,
-        window_size=1000,
+        train_windows, train_targets, test_windows, test_targets,
         batch_size=1024
     )
 
-    model     = CNNMultipleLayers(num_kernels=8, kernel_size=12, window_size=1000).to(device)
+    model     = CNNMultipleLayers(num_kernels=8, kernel_size=12).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
     train_losses = []
@@ -236,5 +217,5 @@ if __name__ == '__main__':
         'val_losses':   val_losses
     })
 
-    save_modelCNN(model)
+    save_modeCNN(model)
     evaluate(model, test_loader, name='Test (Chr5)')
