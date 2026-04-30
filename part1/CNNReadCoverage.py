@@ -217,5 +217,5 @@ if __name__ == '__main__':
         'val_losses':   val_losses
     })
 
-    save_modeCNN(model)
+    save_modelCNN(model)
     evaluate(model, test_loader, name='Test (Chr5)')
