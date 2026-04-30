@@ -145,6 +145,52 @@ def load_coverage(train_path=os.path.join(OUTPUT_DIR, 'train_val_coverage.npy'),
     test_coverage      = np.load(test_path,  allow_pickle=True).item()
     return train_val_coverage, test_coverage
 
+def build_windows(coverage_dict, window_size=1000):
+    """
+    Build sliding windows from coverage data.
+    Returns: (windows, targets) as numpy arrays
+    """
+    half       = window_size // 2
+    all_windows = []
+    all_targets = []
+
+    for srx_id, chrom_dict in coverage_dict.items():
+        for chrom, coverage in chrom_dict.items():
+            if len(coverage) < window_size:
+                continue
+
+            shape   = (len(coverage) - window_size + 1, window_size)
+            strides = (coverage.strides[0], coverage.strides[0])
+            windows = np.lib.stride_tricks.as_strided(coverage, shape=shape, strides=strides)
+            targets = coverage[half : half + len(windows)]
+
+            all_windows.append(windows.copy())
+            all_targets.append(targets.copy())
+
+    windows = np.concatenate(all_windows, axis=0).astype(np.float32)
+    targets = np.concatenate(all_targets, axis=0).astype(np.float32)
+    print(f"Built {len(windows)} windows of size {window_size}")
+    return windows, targets
+
+
+def save_windows(train_windows, train_targets, test_windows, test_targets,
+                 output_dir=OUTPUT_DIR):
+    """Save windows to disk."""
+    os.makedirs(output_dir, exist_ok=True)
+    np.save(os.path.join(output_dir, 'train_windows.npy'), train_windows)
+    np.save(os.path.join(output_dir, 'train_targets.npy'), train_targets)
+    np.save(os.path.join(output_dir, 'test_windows.npy'),  test_windows)
+    np.save(os.path.join(output_dir, 'test_targets.npy'),  test_targets)
+    print(f"Saved windows to {output_dir}")
+
+
+def load_windows(output_dir=OUTPUT_DIR):
+    """Load saved windows from disk."""
+    train_windows = np.load(os.path.join(output_dir, 'train_windows.npy'))
+    train_targets = np.load(os.path.join(output_dir, 'train_targets.npy'))
+    test_windows  = np.load(os.path.join(output_dir, 'test_windows.npy'))
+    test_targets  = np.load(os.path.join(output_dir, 'test_targets.npy'))
+    return train_windows, train_targets, test_windows, test_targets
 
 if __name__ == '__main__':
     if not os.path.exists(DATA_DIR):
