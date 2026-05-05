@@ -15,11 +15,6 @@ NUC_MAP = {'A': 0, 'C': 1, 'G': 2, 'T': 3}
 
 
 def one_hot_encode(sequence, seq_len=SEQ_LEN):
-    """
-    One-hot encode a DNA sequence.
-    Returns: np.array of shape (4, seq_len)
-    A=0, C=1, G=2, T=3, anything else = all zeros
-    """
     enc = np.zeros((4, seq_len), dtype=np.float32)
     for i, nuc in enumerate(sequence[:seq_len]):
         if nuc.upper() in NUC_MAP:
@@ -28,10 +23,6 @@ def one_hot_encode(sequence, seq_len=SEQ_LEN):
 
 
 def load_and_process(csv_path=os.path.join(DATA_DIR, 'arabidopsis_enhancers.csv')):
-    """
-    Load CSV, one-hot encode sequences, split into train/val/test.
-    Returns: (X_train, y_train, X_val, y_val, X_test, y_test)
-    """
     print(f"Loading {csv_path}...")
     df = pd.read_csv(csv_path)
 
@@ -62,7 +53,6 @@ def load_and_process(csv_path=os.path.join(DATA_DIR, 'arabidopsis_enhancers.csv'
 
 def save_processed(X_train, y_train, X_val, y_val, X_test, y_test,
                    output_dir=OUTPUT_DIR):
-    """Save processed data to disk."""
     os.makedirs(output_dir, exist_ok=True)
     np.save(os.path.join(output_dir, 'X_train.npy'), X_train)
     np.save(os.path.join(output_dir, 'y_train.npy'), y_train)
@@ -74,7 +64,6 @@ def save_processed(X_train, y_train, X_val, y_val, X_test, y_test,
 
 
 def load_processed(output_dir=OUTPUT_DIR):
-    """Load previously saved processed data."""
     X_train = np.load(os.path.join(output_dir, 'X_train.npy'))
     y_train = np.load(os.path.join(output_dir, 'y_train.npy'))
     X_val   = np.load(os.path.join(output_dir, 'X_val.npy'))
@@ -96,5 +85,5 @@ if __name__ == '__main__':
     save_processed(X_train, y_train, X_val, y_val, X_test, y_test)
 
     print("\nDone.")
-    print(f"X_train shape: {X_train.shape}")  # (38700, 4, 2500)
-    print(f"y_train shape: {y_train.shape}")  # (38700,)
+    print(f"X_train shape: {X_train.shape}")
+    print(f"y_train shape: {y_train.shape}") 
