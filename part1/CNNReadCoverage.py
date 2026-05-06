@@ -146,7 +146,7 @@ def save_modelCNN(model, train_losses, val_losses, val_pearsons=None,
 
 def load_modelCNN(path=os.path.join(OUTPUT_DIR, 'model.pth'),
                   num_kernels=32, kernel_size=12, window_size=200):
-    checkpoint = torch.load(path, map_location=device, weights_only=False)
+    checkpoint = torch.load(path, map_location=device)
     model      = CNNMultipleLayers(num_kernels=num_kernels,
                                    kernel_size=kernel_size,
                                    window_size=window_size).to(device)
