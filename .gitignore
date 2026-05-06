@@ -208,5 +208,4 @@ __marimo__/
 
 # Project-specific files
 results/*.npy
-results/*.pth
 data/
