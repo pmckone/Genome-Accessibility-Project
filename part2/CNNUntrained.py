@@ -199,7 +199,7 @@ def save_model(model, train_losses, val_losses, val_auprcs,
 
 
 def load_model(path=os.path.join(OUTPUT_DIR, 'CNNUntrained.pth')):
-    checkpoint = torch.load(path, map_location=device, weights_only=False)
+    checkpoint = torch.load(path, map_location=device)
     model = CNN(
     seq_len      = 2500,
     num_filters  = (128, 64, 64),
