@@ -121,7 +121,7 @@ in Jupyter or VS Code.
 
 ---
 
-## Data Set
+## Data Sets/ Refrences
 
 - Kelley et al. (2016). Basset: learning the regulatory code of the accessible genome 
   with deep convolutional neural networks. Genome Research.
