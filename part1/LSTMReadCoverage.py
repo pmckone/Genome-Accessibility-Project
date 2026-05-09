@@ -168,7 +168,7 @@ def save_model_lstm(model, train_losses, val_losses, val_pearsons=None,
 
 def load_model_lstm(path=os.path.join(OUTPUT_DIR, 'lstm_model.pth'),
                     input_dim=1, hidden_dim=64, layer_dim=2, output_dim=1):
-    checkpoint = torch.load(path, map_location=device)
+    checkpoint = torch.load(path, map_location=device, weights_only=False)
     model      = CoverageLSTM(input_dim=input_dim,
                               hidden_dim=hidden_dim,
                               layer_dim=layer_dim,
